@@ -1,0 +1,225 @@
+mqtt_broker:
+  bridge_id: myUnsecureBroker
+  mqtt_host: 192.168.1.200
+  secure: False
+  username:
+  password:
+
+
+# all the groups
+locations:
+  - id: gHouse
+    label: Home
+    semantic_class: Location
+    icon: group
+
+  - id: gGf
+    label: Ground Floor
+    semantic_class: GroundFloor
+    icon: groundfloor
+    groups: [gHouse]
+
+  - id: gFF
+    label: First Floor
+    semantic_class: FirstFloor
+    icon: firstfloor
+    groups: [gHouse]
+
+  - id: gSF
+    label: Second Floor
+    semantic_class: SecondFloor
+    icon: firstfloor
+    groups: [gHouse]
+
+  - id: FF_Room1
+    label: Shaeed's Room
+    semantic_class: Bedroom
+    icon: boy_1
+    groups: [gFF]
+
+  - id: FF_Bath
+    label: Bathroom
+    semantic_class: Bathroom
+    icon: bath
+    groups: [gFF]
+
+  - id: FF_Room2
+    label: Asfia's Room
+    semantic_class: Bedroom
+    icon: girl_1
+    groups: [gFF]
+
+  - id: Water
+    label: Water Pump
+    semantic_class: Indoor
+    icon: pump
+    groups: [gHouse]
+  - Group:Switch:OR(ON, OFF) Lights "All Lights [(%d)]" # active group
+  - Group:Switch:OR(ON, OFF) Fans "No. of Active Fans [(%d)]" <fan_ceiling> # active group
+
+# all the physical devices
+devices:
+  - name: My Home General
+    groups: [gHouse]
+    id: myhome
+    type: my_home
+    icon: boy_1
+    items:
+      - id: electricity_status
+        item_type: Text
+        label: Electricity [%s]
+        main_ui: false
+  - name: Shaeed's Room
+    groups: [FF_Room1]
+    id: relay_6_mpr_c  # esphome name of the node
+    type: dev_mpr_relay6 # device config type
+    icon: boy_1
+    items:
+      - id: status
+        item_type: String
+        label: Status [%s]
+        icon: status
+      - id: wifi_signal
+        item_type: String
+        label: Wifi Signal [%s]
+        icon: network
+        main_ui: false
+      - id: ip_address
+        item_type: String
+        label: IP Address [%s]
+        icon: network
+        main_ui: false
+      - id: mac_address
+        item_type: String
+        label: MAC Address [%s]
+        icon: network
+        main_ui: false
+      - id: uptime
+        item_type: String
+        label: Wifi Signal [%s]
+        icon: network
+        main_ui: false
+
+      - id: relay_0
+        item_type: Switch
+        label: Fan
+        icon: fan_ceiling
+        tags: [Switchable]
+        groups: [Fans] # additional groups apart from parent
+
+      - id: relay_1
+        item_type: Switch
+        label: MI Light
+        icon: lightbulb
+        tags: [Switchable]
+        groups: [Lights]
+
+      - id: relay_2
+        item_type: Switch
+        label: LED Bulb
+        icon: lightbulb
+        tags: [Switchable]
+        groups: [Lights]
+
+      - id: relay_3
+        item_type: Switch
+        label: Power Outlet
+        icon: poweroutlet
+        tags: [Switchable]
+
+      - id: relay_4
+        item_type: Switch
+        label: Out Light
+        icon: outdoorlight
+        tags: [Switchable]
+        groups: [Lights]
+
+      - id: relay_5
+        item_type: Switch
+        label: Ceiling Leight 1
+        icon: sunset
+        tags: [Switchable]
+        groups: [Lights]
+
+      - id: relay_6
+        item_type: Switch
+        label: Ceiling Leight 1
+        icon: sunset
+        tags: [Switchable]
+        groups: [Lights]
+
+      - id: switch_lights
+        item_type: Color
+        label: Switch Light
+        icon: colorwheel
+
+      - id: switch_lights
+        sitem_type: Switch # sitemap item type, it will not be added to items file of openhab
+        label: Switch Lights
+        icon: switch
+
+      - id: switch_lights
+        sitem_type: Slider # sitemap item type, it will not be added to items file of openhab
+        label: Switch Lights Brightness
+        #icon: switch
+
+  - name: Water Pump
+    groups: [Water]
+    id: relay_1_water_pump  # esphome name of the node
+    type: dev_water_pump_relay1 # device config type
+    icon: boy_1
+    items:
+      - id: status
+        item_type: String
+        label: Status [%s]
+        icon: status
+      - id: wifi_signal
+        item_type: String
+        label: Wifi Signal [%s]
+        icon: network
+        main_ui: false
+      - id: ip_address
+        item_type: String
+        label: IP Address [%s]
+        icon: network
+        main_ui: false
+      - id: mac_address
+        item_type: String
+        label: MAC Address [%s]
+        icon: network
+        main_ui: false
+      - id: uptime
+        item_type: String
+        label: Wifi Signal [%s]
+        icon: network
+        main_ui: false
+
+      - id: relay_0
+        item_type: Switch
+        label: Water Pump
+        icon: pump
+        tags: [Switchable]
+
+sitemap:
+  label: Home
+  items: # additional sitemap items
+    - stype: Group
+      item: gFF
+      label: First Floor
+      icon: firstfloor
+      sitemap_extras:
+    - stype: Text
+      item: Weather_Temp_Max
+      label: Weather
+      sitemap_extras: valuecolor=[>25="orange",>15="green",>5="orange",<=5="blue"]
+    - stype: Frame
+      label: FrameLabel
+      items:
+        - stype: Text
+          item: Weather_Temp_Min
+          label: Weather Min
+        - stype: Switch
+          item: switch_lights
+          dev_id: relay_6_mpr_c
+        - Text item=Weather_LastUpdate visibility=[Weather_LastUpdate>30] valuecolor=[Weather_LastUpdate>120="orange", Weather_LastUpdate>300="red"]
+    - Text item=raw_item_example label="Status [%s]" icon="status" # raw sitemaps

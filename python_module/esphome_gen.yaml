@@ -1,0 +1,50 @@
+# esphome MQTT topics to be generated for each channels (sensor, switch, lights etc.)
+esphome:
+  status:
+  general:
+  debug:
+  sensor:
+    - state
+  binary_sensor:
+    - state
+  switch:
+    - state
+    - command
+  light:
+    - state
+    - command
+
+# openhab channel information
+# each channel from esphome must have the corresponding openhab channel. Ex- command is commandTopic in openhab.
+openhab_ch:
+  status:
+    datatype: string
+    channels: [stateTopic]
+  debug:
+    datatype: string
+    channels: [stateTopic]
+  general:
+    datatype: string
+    channels: [commandTopic]
+
+  sensor:
+    datatype: string
+    channels:
+      state: stateTopic
+
+  binary_sensor:
+    datatype: string
+    channels:
+      state: stateTopic
+
+  switch:
+    datatype: switch
+    channels:
+      state: stateTopic
+      command: commandTopic
+
+  light:
+    datatype: string
+    channels:
+      state: stateTopic
+      command: commandTopic

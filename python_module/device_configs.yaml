@@ -1,0 +1,56 @@
+my_home:
+  general:
+    - electricity_status
+
+dev_mpr_relay6:
+  status:  #entity
+  #debug:  #entity
+  sensor:  #entity
+    - wifi_signal
+    - uptime
+    - ip_address
+    - mac_address
+
+  binary_sensor:
+    - touch_key_0
+    - touch_key_1
+    - touch_key_2
+    - touch_key_3
+    - touch_key_4
+    - touch_key_5
+    - touch_key_6
+    - touch_key_7
+    - touch_key_8
+    - touch_key_9
+    - touch_key_10
+    - touch_key_11
+
+  switch:
+    - relay_0
+    - relay_1
+    - relay_2
+    - relay_3
+    - relay_4
+    - relay_5
+    - relay_6
+
+  light:
+    - id: switch_lights
+      effects:
+        - None
+        - Rainbow
+        - CO Alarm
+        - Intrusion Alarm
+
+dev_water_pump_relay1:
+  status:
+  #debug:
+  sensor:
+    - wifi_signal
+    - uptime
+    - ip_address
+    - mac_address
+
+  switch:
+    - relay_0
+

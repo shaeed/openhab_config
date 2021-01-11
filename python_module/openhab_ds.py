@@ -158,8 +158,8 @@ class OHMqttBridge(OHBase):
 
 
 class OHItem(OHBase):
-    def __init__(self, name: str = None, item_type: str = 'String', label: str = '', icon: str = 'switch',
-                 groups: List[str] = None, tags: List[str] = None, main_ui: bool = True, id: str = None,
+    def __init__(self, name: str = None, item_type: str = 'String', label: str = '', icon: str = None,
+                 groups: List[str] = None, tags: List[str] = None, main_ui: str = 'yes', id: str = None,
                  raw_item: str = None, **kwargs):
         self.item_type = item_type
         self.item_name = name
@@ -179,6 +179,9 @@ class OHItem(OHBase):
     def add_channel(self, channel: OHChannel):
         self.channel = channel
 
+    def add_group(self, group: str):
+        self.groups.append(group)
+
     def add_groups(self, groups: List[str]):
         self.groups.extend(groups)
 
@@ -196,6 +199,9 @@ class OHItem(OHBase):
 
     def get_item_name(self) -> str:
         return self.item_name
+
+    def get_main_ui(self) -> str:
+        return self.main_ui
 
     def convert_to_string(self) -> List[str]:
         if self.raw_item:
@@ -220,7 +226,7 @@ class OHItem(OHBase):
 
 class OHGroup(OHBase):
     def __init__(self, id: str = None, label: str = None, icon: str = None, groups: List[str] = None,
-                 semantic_class: str = '', raw_grp: str = None):
+                 semantic_class: str = '', raw_grp: str = None, main_ui: str = 'yes'):
         self.id = id  # group name
         self.label = label
         self.icon = icon
@@ -228,6 +234,10 @@ class OHGroup(OHBase):
         else: self.groups = []
         self.semantic_class = semantic_class
         self.raw_grp = raw_grp
+        self.main_ui = main_ui
+
+    def get_main_ui(self) -> str:
+        return self.main_ui
 
     def convert_to_string(self) -> List[str]:
         if self.raw_grp:

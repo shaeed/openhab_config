@@ -90,27 +90,32 @@ def sitemap_for_devices(items: List[OHItem], groups: List[OHGroup], devices: Lis
                 actual_sitem.set_item(actual_item)
             else:
                 actual_sitem = OHSiteMapItem(item=actual_item)
-            if 'main_ui' in item and not item['main_ui']:
+            if 'main_ui' in item and item['main_ui'] == 'setting':
                 dev_setting_frame.add_child(actual_sitem)
                 flag_add_dev_setting_frame = True
-            else:
+            elif 'main_ui' in item and item['main_ui'] != 'no' or 'main_ui' not in item:
                 dev_entry.add_child(actual_sitem)
                 flag_add_dev_frame = True
+        # end for
         if flag_add_dev_frame:
             devices_frame.add_child(dev_entry)
         if flag_add_dev_setting_frame:
             status_settings.add_child(dev_setting_frame)
+    # end for
+
     # add group to status and settings
     group_sitem = sitemap_for_groups(groups)
     status_settings.add_child(group_sitem)
 
-    return [status_frame, devices_frame]
+    return [devices_frame, status_frame]
 
 
 def sitemap_for_groups(groups: List[OHGroup]) -> OHBase:
     group_frame = OHSiteMapFrame()
     for group in groups:
         if group.raw_grp:
+            continue
+        if group.get_main_ui() == 'no':
             continue
         group_sitem = OHSiteMapItem(sitem_type='Group', item=group.id, label=group.label, icon=group.icon)
         group_frame.add_child(group_sitem)

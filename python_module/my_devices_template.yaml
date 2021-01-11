@@ -1,3 +1,7 @@
+# details:
+# items:main_ui - [yes(default), no, setting] Decides where an item will be added.
+
+
 mqtt_broker:
   bridge_id: myUnsecureBroker
   mqtt_host: 192.168.1.200
@@ -12,6 +16,7 @@ locations:
     label: Home
     semantic_class: Location
     icon: group
+    main_ui: no
 
   - id: gGf
     label: Ground Floor
@@ -36,24 +41,28 @@ locations:
     semantic_class: Bedroom
     icon: boy_1
     groups: [gFF]
+    main_ui: no
 
   - id: FF_Bath
     label: Bathroom
     semantic_class: Bathroom
     icon: bath
     groups: [gFF]
+    main_ui: no
 
   - id: FF_Room2
     label: Asfia's Room
     semantic_class: Bedroom
     icon: girl_1
     groups: [gFF]
+    main_ui: no
 
   - id: Water
     label: Water Pump
     semantic_class: Indoor
     icon: pump
     groups: [gHouse]
+
   - Group:Switch:OR(ON, OFF) Lights "All Lights [(%d)]" # active group
   - Group:Switch:OR(ON, OFF) Fans "No. of Active Fans [(%d)]" <fan_ceiling> # active group
 
@@ -68,7 +77,7 @@ devices:
       - id: electricity_status
         item_type: Text
         label: Electricity [%s]
-        main_ui: false
+        main_ui: setting
   - name: Shaeed's Room
     groups: [FF_Room1]
     id: relay_6_mpr_c  # esphome name of the node
@@ -83,22 +92,22 @@ devices:
         item_type: String
         label: Wifi Signal [%s]
         icon: network
-        main_ui: false
+        main_ui: setting
       - id: ip_address
         item_type: String
         label: IP Address [%s]
         icon: network
-        main_ui: false
+        main_ui: setting
       - id: mac_address
         item_type: String
         label: MAC Address [%s]
         icon: network
-        main_ui: false
+        main_ui: setting
       - id: uptime
         item_type: String
         label: Wifi Signal [%s]
         icon: network
-        main_ui: false
+        main_ui: setting
 
       - id: relay_0
         item_type: Switch
@@ -143,7 +152,7 @@ devices:
 
       - id: relay_6
         item_type: Switch
-        label: Ceiling Leight 1
+        label: Ceiling Leight 2
         icon: sunset
         tags: [Switchable]
         groups: [Lights]
@@ -152,6 +161,7 @@ devices:
         item_type: Color
         label: Switch Light
         icon: colorwheel
+        update_mode: rgb_light  # translate value using rule and group
 
       - id: switch_lights
         sitem_type: Switch # sitemap item type, it will not be added to items file of openhab
@@ -177,22 +187,22 @@ devices:
         item_type: String
         label: Wifi Signal [%s]
         icon: network
-        main_ui: false
+        main_ui: setting
       - id: ip_address
         item_type: String
         label: IP Address [%s]
         icon: network
-        main_ui: false
+        main_ui: setting
       - id: mac_address
         item_type: String
         label: MAC Address [%s]
         icon: network
-        main_ui: false
+        main_ui: setting
       - id: uptime
         item_type: String
         label: Wifi Signal [%s]
         icon: network
-        main_ui: false
+        main_ui: setting
 
       - id: relay_0
         item_type: Switch

@@ -18,30 +18,48 @@ def create_items(bridge: OHMqttBridge, devices: List[dict]) -> List[OHItem]:
                 item = OHItem(raw_item=item_data)
                 all_items.append(item)
             elif 'item_type' in item_data:
-                item = create_item(item_data, dev_id, dev_groups)
-                channel = get_channel(bridge, dev_id, item.get_item_id())
-                item.add_channel(channel)
-                all_items.append(item)
+                channel = get_channel(bridge, dev_id, item_data['id'])
+                created_items = create_item(item_data, dev_id, dev_groups, channel)
+                # item.add_channel(channel)
+                all_items.extend(created_items)
         # end inner for
     # end for
 
     # print
-    #print()
-    #items_str = map(lambda x: x.convert_to_string(), all_items)
-    #items_str2 = reduce(lambda x, y: x + y, items_str)
-    #text = '\n'.join(items_str2)
-    #print(text)
+    # items_str = map(lambda x: x.convert_to_string(), all_items)
+    # items_str2 = reduce(lambda x, y: x + y, items_str)
+    # text = '\n'.join(items_str2)
+    # print(text)
 
     return all_items
 
 
-def create_item(data: dict, device_id: str, parent_groups: List[str]) -> OHItem:
+def create_item(data: dict, device_id: str, parent_groups: List[str], channel: OHChannel) -> List[OHItem]:
     item_name = f'{data["id"]}_{device_id}'
     item = OHItem(name=item_name, **data)
     item.add_groups(parent_groups)
     item.set_device_id(device_id)
 
-    return item
+    created_items = [item]
+
+    # create updater items (for lights or any other)
+    if 'update_mode' in data:
+        # add group in last created item (this group will take input from UI)
+        item.add_group(data['update_mode'])
+
+        # additional item
+        item_name = data['update_mode'] + '_' + item_name
+        item = OHItem(name=item_name, main_ui='no')
+        item.add_groups(parent_groups)
+        item.add_group('esp_' + data['update_mode'])  # this group will receive input from esp and update UI
+        if 'groups' in data:
+            item.add_groups(data['groups'])
+        created_items.append(item)
+
+    # add the channel in target item
+    item.add_channel(channel)
+
+    return created_items
 
 
 def get_channel(bridge: OHMqttBridge, device_id: str, item_id: str) -> OHChannel:

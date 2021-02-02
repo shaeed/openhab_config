@@ -15,6 +15,7 @@ def create_items(bridge: OHMqttBridge, devices: List[dict]) -> List[OHItem]:
             continue
         for item_data in device['items']:
             if isinstance(item_data, str):
+                # raw item
                 item = OHItem(raw_item=item_data)
                 all_items.append(item)
             elif 'item_type' in item_data:

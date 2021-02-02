@@ -38,6 +38,13 @@ locations:
     groups: [gFF]
     main_ui: 'no'
 
+  - id: FF_Room2
+    label: Asfia's Room
+    semantic_class: Bedroom
+    icon: girl_1
+    groups: [gFF]
+    main_ui: 'no'
+
   - id: FF_Bath
     label: Bathroom
     semantic_class: Bathroom
@@ -45,10 +52,17 @@ locations:
     groups: [gFF]
     main_ui: 'no'
 
-  - id: FF_Room2
-    label: Asfia's Room
-    semantic_class: Bedroom
-    icon: girl_1
+  - id: FF_Hall
+    label: First Floor Hall
+    semantic_class: Corridor
+    icon: corridor
+    groups: [gFF]
+    main_ui: 'no'
+
+  - id: FF_Kitchen
+    label: First Floor Kitchen
+    semantic_class: Kitchen
+    icon: kitchen
     groups: [gFF]
     main_ui: 'no'
 
@@ -167,6 +181,99 @@ devices:
         sitem_type: Slider # sitemap item type, it will not be added to items file of openhab
         label: Switch Light Brightness
         icon: slider
+  - name: Asfia's Room
+    groups: [FF_Room2]
+    id: ff_room2  # esphome name of the node
+    type: dev_mpr_relay6 # device config type
+    icon: girl_1
+    items:
+      - id: status
+        item_type: String
+        label: Status [%s]
+        icon: status
+      - id: wifi_signal
+        item_type: String
+        label: Wifi Signal [%s]
+        icon: network
+        main_ui: setting
+      - id: ip_address
+        item_type: String
+        label: IP Address [%s]
+        icon: text
+        main_ui: setting
+      - id: mac_address
+        item_type: String
+        label: MAC Address [%s]
+        icon: text
+        main_ui: setting
+      - id: uptime
+        item_type: String
+        label: Uptime [%s]
+        icon: time
+        main_ui: setting
+      - id: restart
+        item_type: Switch
+        label: Restart Node
+        icon: error
+        main_ui: setting
+
+      - id: relay_0
+        item_type: Switch
+        label: Night Light
+        icon: sun_clouds
+        tags: [Switchable]
+        groups: [Lights] # additional groups apart from parent
+      - id: relay_1
+        item_type: Switch
+        label: Ceiling Lights
+        icon: sunset
+        tags: [Switchable]
+        groups: [Lights]
+      - id: relay_2
+        item_type: Switch
+        label: Tube Light
+        icon: lightbulb
+        tags: [Switchable]
+        groups: [Lights]
+      - id: relay_3
+        item_type: Switch
+        label: Fan 2
+        icon: fan_ceiling
+        tags: [Switchable]
+        groups: [Fans]
+      - id: relay_4
+        item_type: Switch
+        label: Fan 1
+        icon: fan_ceiling
+        tags: [Switchable]
+        groups: [Fans]
+      - id: relay_5
+        item_type: Switch
+        label: Led Light
+        icon: lightbulb
+        tags: [Switchable]
+        groups: [Lights]
+      - id: relay_6
+        item_type: Switch
+        label: Power Outlet
+        icon: poweroutlet
+        tags: [Switchable]
+
+      - id: switch_lights
+        item_type: Color
+        label: Switch Light
+        icon: colorwheel
+        main_ui: setting
+        update_mode: rgb_light
+      - id: switch_lights
+        sitem_type: Switch # sitemap item type, it will not be added to items file of openhab
+        label: Switch Light
+        icon: switch
+        main_ui: setting
+      - id: switch_lights
+        sitem_type: Slider # sitemap item type, it will not be added to items file of openhab
+        label: Switch Light Brightness
+        icon: slider
   - name: First Floor Bathroom
     groups: [FF_Bath]
     id: ff_bathroom  # esphome name of the node
@@ -231,6 +338,173 @@ devices:
         label: Restart Router
         icon: receiver
         main_ui: setting
+
+      - id: switch_lights
+        item_type: Color
+        label: Switch Light
+        icon: colorwheel
+        main_ui: setting
+        update_mode: rgb_light
+      - id: switch_lights
+        sitem_type: Switch # sitemap item type, it will not be added to items file of openhab
+        label: Switch Light
+        icon: switch
+        main_ui: setting
+      - id: switch_lights
+        sitem_type: Slider # sitemap item type, it will not be added to items file of openhab
+        label: Switch Light Brightness
+        icon: slider
+  - name: First Floor Kitchen
+    groups: [FF_Kitchen]
+    id: ff_kitchen  # esphome name of the node
+    type: dev_mpr_pir_relay # device config type
+    icon: kitchen
+    items:
+      - id: status
+        item_type: String
+        label: Status [%s]
+        icon: status
+      - id: wifi_signal
+        item_type: String
+        label: Wifi Signal [%s]
+        icon: network
+        main_ui: setting
+      - id: ip_address
+        item_type: String
+        label: IP Address [%s]
+        icon: text
+        main_ui: setting
+      - id: mac_address
+        item_type: String
+        label: MAC Address [%s]
+        icon: text
+        main_ui: setting
+      - id: uptime
+        item_type: String
+        label: Uptime [%s]
+        icon: time
+        main_ui: setting
+      - id: restart
+        item_type: Switch
+        label: Restart Node
+        icon: error
+        main_ui: setting
+
+      - id: relay_0
+        item_type: Switch
+        label: Relay 0
+        icon: lightbulb
+        tags: [Switchable]
+      - id: relay_1
+        item_type: Switch
+        label: Relay 1
+        icon: lightbulb
+        tags: [Switchable]
+        groups: [Lights]
+      - id: relay_2
+        item_type: Switch
+        label: Relay 2
+        icon: lightbulb
+        tags: [Switchable]
+        groups: [Lights]
+      - id: relay_3
+        item_type: Switch
+        label: Relay 3
+        icon: heating
+        tags: [Switchable]
+
+      - id: switch_lights
+        item_type: Color
+        label: Switch Light
+        icon: colorwheel
+        main_ui: setting
+        update_mode: rgb_light
+      - id: switch_lights
+        sitem_type: Switch # sitemap item type, it will not be added to items file of openhab
+        label: Switch Light
+        icon: switch
+        main_ui: setting
+      - id: switch_lights
+        sitem_type: Slider # sitemap item type, it will not be added to items file of openhab
+        label: Switch Light Brightness
+        icon: slider
+  - name: First Floor Hall
+    groups: [FF_Hall]
+    id: ff_hall  # esphome name of the node
+    type: dev_mpr_relay6 # device config type
+    icon: corridor
+    items:
+      - id: status
+        item_type: String
+        label: Status [%s]
+        icon: status
+      - id: wifi_signal
+        item_type: String
+        label: Wifi Signal [%s]
+        icon: network
+        main_ui: setting
+      - id: ip_address
+        item_type: String
+        label: IP Address [%s]
+        icon: text
+        main_ui: setting
+      - id: mac_address
+        item_type: String
+        label: MAC Address [%s]
+        icon: text
+        main_ui: setting
+      - id: uptime
+        item_type: String
+        label: Uptime [%s]
+        icon: time
+        main_ui: setting
+      - id: restart
+        item_type: Switch
+        label: Restart Node
+        icon: error
+        main_ui: setting
+
+      - id: relay_0
+        item_type: Switch
+        label: Relay 0
+        icon: sun_clouds
+        tags: [Switchable]
+        groups: [Lights] # additional groups apart from parent
+      - id: relay_1
+        item_type: Switch
+        label: Relay 1
+        icon: sunset
+        tags: [Switchable]
+        groups: [Lights]
+      - id: relay_2
+        item_type: Switch
+        label: Relay 2
+        icon: lightbulb
+        tags: [Switchable]
+        groups: [Lights]
+      - id: relay_3
+        item_type: Switch
+        label: Relay 3
+        icon: fan_ceiling
+        tags: [Switchable]
+        groups: [Fans]
+      - id: relay_4
+        item_type: Switch
+        label: Relay 4
+        icon: fan_ceiling
+        tags: [Switchable]
+        groups: [Fans]
+      - id: relay_5
+        item_type: Switch
+        label: Relay 5
+        icon: lightbulb
+        tags: [Switchable]
+        groups: [Lights]
+      - id: relay_6
+        item_type: Switch
+        label: Relay 6
+        icon: poweroutlet
+        tags: [Switchable]
 
       - id: switch_lights
         item_type: Color

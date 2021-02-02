@@ -97,3 +97,16 @@ dev_mpr_pir_relay:
         - Rainbow
         - CO Alarm
         - Intrusion Alarm
+
+quin_led_duo_v2_6:
+  status:  #entity
+  #debug:  #entity
+  sensor:  #entity
+    - wifi_signal
+    - uptime
+    - ip_address
+    - mac_address
+
+  light:
+    - id: light_1
+    - id: light_2

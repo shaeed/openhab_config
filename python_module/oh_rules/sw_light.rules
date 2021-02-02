@@ -1,0 +1,221 @@
+//import org.eclipse.smarthome.model.script.ScriptServiceUtil //for OH2
+import org.openhab.core.model.script.ScriptServiceUtil  // for OH3
+//import java.io.File
+
+
+//Global variable to handling the update to and from
+var updateFromEsp = false 
+
+
+rule "Update Switch board lights from UI"
+when
+	Member of rgb_light received command 
+then
+    //Dont run this rule as UI is being update from data received on mqtt (not from user)
+    if(updateFromEsp){
+        updateFromEsp = false
+        return
+    }
+
+	var colorItemName = triggeringItem.name
+	var colorItemUpdate = ScriptServiceUtil.getItemRegistry.getItem("rgb_light_" + colorItemName) as StringItem
+
+    val st = triggeringItem.getStateAs(OnOffType).toString //State of switch, ON/OFF
+    val brightness = ((triggeringItem.getStateAs(PercentType) * 255) /100) // change max value to 255
+
+    val HSBType colorValue = triggeringItem.getStateAs(HSBType)
+    val red = colorValue.red / 100 * 255
+    val green = colorValue.green / 100 * 255
+    val blue = colorValue.blue / 100 * 255
+
+    //logInfo("Notification", "Switch board - State:" + st + ", red:" + red + ", green:" + green + ", blue:" + blue)
+    var message = ""
+    if(st == "OFF"){
+        message = "{\"state\":\"" + st + "\"}"
+        colorItemUpdate.sendCommand(message)
+        return
+    }
+
+    //Get the existing state (ui- update item)
+    val uiState = colorItemUpdate.state.toString
+    //logInfo("Notification", uiState)
+    val effect = transform("JSONPATH", "$.effect", uiState)
+    val lastState = transform("JSONPATH", "$.state", uiState)
+    /*val uiBrightnessStr =  transform("JSONPATH", "$.brightness", uiState)
+    val uiRs =  transform("JSONPATH", "$.color.r", uiState)
+    val uiGs =  transform("JSONPATH", "$.color.g", uiState)
+    val uiBs =  transform("JSONPATH", "$.color.b", uiState)
+    val int uiBrightness =  Integer.parseInt(uiBrightnessStr)
+    val int uiR =  Integer.parseInt(uiRs)
+    val int uiG =  Integer.parseInt(uiGs)
+    val int uiB =  Integer.parseInt(uiBs)*/
+	
+    /*var colorUpdateNeeded = false
+    var calc = uiR/uiBrightness - red/brightness
+    if(calc < 0){
+        calc = calc * -1
+    }
+    logInfo("Notification", "1: " + calc)
+    if(calc > 0.1) {
+        colorUpdateNeeded = true
+    } else {
+        calc = uiG/uiBrightness - green/brightness
+        if(calc < 0){
+            calc = calc * -1
+        }
+    logInfo("Notification", "2: " + calc)
+        if(calc > 0.1) {
+            colorUpdateNeeded = true
+        } else {
+            calc = uiB/uiBrightness - blue/brightness
+            if(calc < 0){
+                calc = calc * -1
+            }
+    logInfo("Notification", "3: " + calc)
+            if(calc > 0.1) {
+                colorUpdateNeeded = true
+            }
+        }
+    }
+
+    if(colorUpdateNeeded){
+        message = "{"
+                + "\"state\":\"" + st + "\","
+                + "\"effect\":\"" + effect + "\","                
+                + "\"brightness\":" + brightness + ","
+                + "\"color\":{\"r\":" + red + ",\"g\":" + green + ",\"b\":" + blue + "}"
+                + "}"
+    } else {
+        message = "{"
+                + "\"state\":\"" + st + "\","               
+                + "\"brightness\":" + brightness
+                + "}"
+    }*/
+
+    if(lastState == "OFF"){
+        //Just switch it on, no other info
+        message = "{"
+            + "\"state\":\"" + st + "\","
+            + "\"effect\":\"" + effect + "\""
+            + "}"
+    } else {
+        message = "{"
+            + "\"state\":\"" + st + "\","
+            + "\"effect\":\"" + effect + "\","                
+            + "\"brightness\":" + brightness + ","
+            + "\"color\":{\"r\":" + red + ",\"g\":" + green + ",\"b\":" + blue + "}"
+            + "}"
+    }
+
+    logInfo("Notification", message)
+    //logInfo("Notification", "Switch board - UIState:" + st + ", red:" + uiR + ", green:" + uiG + ", blue:" + uiB + ", Brightness:" + uiBrightness)
+    //logInfo("Notification", "abc " + colorUpdateNeeded)
+	
+    colorItemUpdate.sendCommand(message)
+end
+
+rule "Update Switch board lights from mqtt"
+when
+	Member of esp_rgb_light received update 
+then
+    //Dont run this rule as UI is being update from data received on mqtt (not from user)
+    /*if(updateFromEsp){
+        updateFromEsp = false
+        return
+    }*/
+    updateFromEsp = true
+
+    var updateItemName = triggeringItem.name.replace("rgb_light_", "")
+	var colorItemUpdate = ScriptServiceUtil.getItemRegistry.getItem(updateItemName) as ColorItem
+
+    val uiState = triggeringItem.state.toString
+    logInfo("Notification", "from esp" + uiState)
+    //val effect = transform("JSONPATH", "$.effect", uiState)
+    val lastState = transform("JSONPATH", "$.state", uiState)
+    val uiBrightnessStr =  transform("JSONPATH", "$.brightness", uiState)
+    val uiRs =  transform("JSONPATH", "$.color.r", uiState)
+    val uiGs =  transform("JSONPATH", "$.color.g", uiState)
+    val uiBs =  transform("JSONPATH", "$.color.b", uiState)
+    val int uiBrightness =  Integer.parseInt(uiBrightnessStr)
+    var brt2 = (uiBrightness * 100) / 255  //calculate actual brightness value percentage
+    val int uiR =  Integer.parseInt(uiRs)
+    val int uiG =  Integer.parseInt(uiGs)
+    val int uiB =  Integer.parseInt(uiBs)
+
+    //Light is off, make brightness zero so openHAB will treat it as off.
+    if(lastState == "OFF"){
+        brt2 = 0
+    }
+
+    var HSBType hsb = HSBType::fromRGB(uiR, uiG, uiB)  // this hsb value does not have actual brightness value 
+    val hsbhue = hsb.getHue()
+    val hsbsat = hsb.getSaturation()
+    var HSBType newState = new HSBType( hsbhue,hsbsat,new PercentType(brt2))  // reinsert hsb values with actual brightness
+
+    colorItemUpdate.sendCommand(newState)  // update color picker in the UI
+end
+
+rule "Update mono lights from UI"
+when
+	Member of mono_light received command 
+then
+    //Dont run this rule as UI is being update from data received on mqtt (not from user)
+    if(updateFromEsp){
+        updateFromEsp = false
+        return
+    }
+
+	var lightItemName = triggeringItem.name
+	var lightItemUpdate = ScriptServiceUtil.getItemRegistry.getItem("mono_light_" + lightItemName) as StringItem
+
+    val st = triggeringItem.getStateAs(OnOffType).toString //State of switch, ON/OFF
+    val brightness = ((triggeringItem.getStateAs(PercentType) * 255) /100) // change max value to 255
+
+    var message = ""
+    if(st == "OFF"){
+        message = "{\"state\":\"" + st + "\"}"
+        lightItemUpdate.sendCommand(message)
+        return
+    }
+
+    //Get the existing state (ui- update item)
+    val uiState = lightItemUpdate.state.toString
+    //logInfo("Notification", uiState)
+    //val lastBrightness = transform("JSONPATH", "$.brightness", uiState)
+    val lastState = transform("JSONPATH", "$.state", uiState)
+    
+    if(lastState == "OFF"){
+        //Just switch it on, no other info
+        message = "{\"state\":\"" + st + "\"}"
+    } else {
+        message = "{\"state\":\"" + st + "\",\"brightness\":" + brightness + "}"
+    }
+	
+    lightItemUpdate.sendCommand(message)
+end
+
+rule "Update mono lights from mqtt"
+when
+	Member of esp_mono_light received update 
+then
+    //Dont run this rule as UI is being update from data received on mqtt (not from user)
+    /*if(updateFromEsp){
+        updateFromEsp = false
+        return
+    }*/
+    updateFromEsp = true
+
+    var updateItemName = triggeringItem.name.replace("mono_light_", "")
+	var lightItemUpdate = ScriptServiceUtil.getItemRegistry.getItem(updateItemName) as DimmerItem
+
+    val uiState = triggeringItem.state.toString
+    val newState = transform("JSONPATH", "$.state", uiState)
+    val uiBrightnessStr =  transform("JSONPATH", "$.brightness", uiState)
+    val int uiBrightness =  Integer.parseInt(uiBrightnessStr)
+    var brt2 = (uiBrightness * 100) / 255  //calculate actual brightness value percentage
+    if(newState == "OFF"){
+        brt2 = 0
+    }
+
+    lightItemUpdate.sendCommand(brt2)
+end

@@ -314,6 +314,9 @@ class OHSiteMapFrame(OHBase):
     def add_children(self, children):
         self.children.extend(children)
 
+    def get_children(self) -> list:
+        return self.children
+
     def convert_to_string(self) -> List[str]:
         row = f'Frame'
         if self.label:

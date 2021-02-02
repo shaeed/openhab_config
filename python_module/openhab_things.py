@@ -1,5 +1,7 @@
 """
 Things and channels will be created based on Device type not by the items added under device.
+Device type will be taken from my_devices and from that device things will be taken from
+device_configs.yaml.
 """
 from openhab_ds import OHMqttBridge, OHMqttThings, ChannelCommand, OHThings, OHChannel
 from configs import get_esphome_openhab_config, get_device_configs
@@ -22,7 +24,16 @@ def create_things_channels(bridge: OHMqttBridge, devices: List[dict]):
     """
     device_config = get_device_configs()
 
+    unique_things = {}
     for device in devices:
+        if device['id'] in unique_things:
+            continue
+        thing_details = {'id': device['id'],
+                         'name': device['name'],
+                         'type': device['type']}
+        unique_things[device['id']] = thing_details
+
+    for dev_id, device in unique_things.items():
         thing = create_mqtt_thing(device['id'], device['name'])
         channels = create_channels(device['id'], device_config[device['type']])
         thing.add_channels(channels)

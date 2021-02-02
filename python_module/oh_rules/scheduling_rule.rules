@@ -1,0 +1,15 @@
+/*rule "Scheduling test on"
+when
+	Time cron "0 * * * * ?"
+then
+    
+    relay_2_ff_room1.sendCommand("ON")
+end
+
+rule "Scheduling test off"
+when
+	Time cron "30 * * * * ?"
+then
+    
+    relay_2_ff_room1.sendCommand("OFF")
+end*/

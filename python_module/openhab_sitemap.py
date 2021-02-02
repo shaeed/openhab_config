@@ -65,6 +65,31 @@ def get_item(item_id: str, dev_id: str, items: List[OHItem]) -> Union[OHItem, st
     return item_id
 
 
+def get_device_sitemap_frames(device: dict, devices: List[dict], devices_frame: OHSiteMapFrame):
+    # check if frame is already created for this device
+    # device frame (return same frame, if found)
+    for child in devices_frame.get_children():
+        if device['name'] == child.label:
+            dev_frame = child
+            its_new_frame = False
+            break
+    else:
+        dev_frame = OHSiteMapItem(sitem_type='Text', label=device['name'], icon=device['icon'])
+        its_new_frame = True
+
+    # status & settings item
+    # check if device name is used more than 1
+    dev_name_count = sum([1 for x in devices if x['name'] == device['name']])
+    if dev_name_count == 1:
+        # just one instance
+        dev_setting_frame = OHSiteMapFrame(label=device['name'])
+    else:
+        # more than one instance (Add device id also in label)
+        dev_setting_frame = OHSiteMapFrame(label=f"{device['name']} ({device['id']})")
+
+    return dev_frame, its_new_frame, dev_setting_frame
+
+
 def sitemap_for_devices(items: List[OHItem], groups: List[OHGroup], devices: List[dict]) -> List[OHBase]:
     # status and settings frame
     status_frame = OHSiteMapFrame()
@@ -75,8 +100,9 @@ def sitemap_for_devices(items: List[OHItem], groups: List[OHGroup], devices: Lis
     devices_frame = OHSiteMapFrame()
 
     for device in devices:
-        dev_entry = OHSiteMapItem(sitem_type='Text', label=device['name'], icon=device['icon'])
-        dev_setting_frame = OHSiteMapFrame(label=device['name'])
+        # dev_entry = OHSiteMapItem(sitem_type='Text', label=device['name'], icon=device['icon'])
+        # dev_setting_frame = OHSiteMapFrame(label=device['name'])
+        dev_entry, its_new_frame, dev_setting_frame = get_device_sitemap_frames(device, devices, devices_frame)
 
         flag_add_dev_frame = False
         flag_add_dev_setting_frame = False
@@ -97,7 +123,7 @@ def sitemap_for_devices(items: List[OHItem], groups: List[OHGroup], devices: Lis
                 dev_entry.add_child(actual_sitem)
                 flag_add_dev_frame = True
         # end for
-        if flag_add_dev_frame:
+        if flag_add_dev_frame and its_new_frame:
             devices_frame.add_child(dev_entry)
         if flag_add_dev_setting_frame:
             status_settings.add_child(dev_setting_frame)

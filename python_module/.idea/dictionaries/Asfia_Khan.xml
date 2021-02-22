@@ -3,6 +3,7 @@
     <words>
       <w>esphome</w>
       <w>mqtt</w>
+      <w>ohconfig</w>
       <w>openhab</w>
       <w>sitem</w>
       <w>sitems</w>

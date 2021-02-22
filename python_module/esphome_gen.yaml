@@ -25,7 +25,7 @@ openhab_ch:
     channels: [stateTopic]
   general:
     datatype: string
-    channels: [commandTopic]
+    channels: [commandTopic, stateTopic]
 
   sensor:
     datatype: string

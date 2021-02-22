@@ -6,5 +6,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="opconfig" />
     <orderEntry type="module" module-name="ohconfig" />
+    <orderEntry type="module" module-name="ohconfig_web" />
   </component>
 </module>

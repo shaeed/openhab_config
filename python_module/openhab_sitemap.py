@@ -116,12 +116,11 @@ def sitemap_for_devices(items: List[OHItem], groups: List[OHGroup], devices: Lis
                 actual_sitem.set_item(actual_item)
             else:
                 actual_sitem = OHSiteMapItem(item=actual_item)
-            if 'main_ui' in item and item['main_ui'] == 'setting':
-                dev_setting_frame.add_child(actual_sitem)
-                flag_add_dev_setting_frame = True
-            elif 'main_ui' in item and item['main_ui'] != 'no' or 'main_ui' not in item:
-                dev_entry.add_child(actual_sitem)
-                flag_add_dev_frame = True
+
+            # where to add this item/sitem
+            flag_dev, flag_setting = add_item_to_places(item, actual_sitem, dev_entry, dev_setting_frame)
+            flag_add_dev_frame = flag_dev or flag_add_dev_frame
+            flag_add_dev_setting_frame = flag_setting or flag_add_dev_setting_frame
         # end for
         if flag_add_dev_frame and its_new_frame:
             devices_frame.add_child(dev_entry)
@@ -134,6 +133,45 @@ def sitemap_for_devices(items: List[OHItem], groups: List[OHGroup], devices: Lis
     status_settings.add_child(group_sitem)
 
     return [devices_frame, status_frame]
+
+
+def add_item_to_places(item: dict, actual_sitem: OHSiteMapItem, dev_entry, dev_setting_frame):
+    flag_add_dev_frame = False
+    flag_add_dev_setting_frame = False
+
+    if 'main_ui' not in item:
+        # default case, add it to main ui
+        dev_entry.add_child(actual_sitem)
+        flag_add_dev_frame = True
+    # elif isinstance(item['main_ui'], str):
+    #     if item['main_ui'] == 'setting':
+    #         dev_setting_frame.add_child(actual_sitem)
+    #         flag_add_dev_setting_frame = True
+    #     elif item['main_ui'] == 'yes':
+    #         dev_entry.add_child(actual_sitem)
+    #         flag_add_dev_frame = True
+    # elif isinstance(item['main_ui'], list):
+    #     if 'yes' in item['main_ui']:
+    #         dev_entry.add_child(actual_sitem)
+    #         flag_add_dev_frame = True
+    #     if 'setting' in item['main_ui']:
+    #         dev_setting_frame.add_child(actual_sitem)
+    #         flag_add_dev_setting_frame = True
+    else:
+        if 'yes' in item['main_ui']:
+            dev_entry.add_child(actual_sitem)
+            flag_add_dev_frame = True
+        if 'setting' in item['main_ui']:
+            dev_setting_frame.add_child(actual_sitem)
+            flag_add_dev_setting_frame = True
+    # if 'main_ui' in item and isinstance(item['main_ui'], str) and item['main_ui'] == 'setting':
+    #     dev_setting_frame.add_child(actual_sitem)
+    #     flag_add_dev_setting_frame = True
+    # elif 'main_ui' in item and item['main_ui'] != 'no' or 'main_ui' not in item:
+    #     dev_entry.add_child(actual_sitem)
+    #     flag_add_dev_frame = True
+
+    return flag_add_dev_frame, flag_add_dev_setting_frame
 
 
 def sitemap_for_groups(groups: List[OHGroup]) -> OHBase:

@@ -1,6 +1,8 @@
 my_home:
   general:
     - electricity_status
+    - hub_battery
+    - hub_battery_state
 
 dev_mpr_relay6:
   status:  #entity
@@ -43,7 +45,7 @@ dev_mpr_relay6:
         - CO Alarm
         - Intrusion Alarm
 
-dev_water_pump_relay1:
+dev_relay1:
   status:
   #debug:
   sensor:
@@ -110,3 +112,19 @@ quin_led_duo_v2_6:
   light:
     - id: light_1
     - id: light_2
+
+dev_cust1_staircase:
+  status:  #entity
+  #debug:  #entity
+  sensor:  #entity
+    - wifi_signal
+    - uptime
+    - ip_address
+    - mac_address
+
+  binary_sensor:
+    - grid_power
+
+  switch:
+    - restart
+    - relay_0

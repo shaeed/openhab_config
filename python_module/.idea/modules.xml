@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/../../ohconfig/.idea/ohconfig.iml" filepath="$PROJECT_DIR$/../../ohconfig/.idea/ohconfig.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../ohconfig_web/.idea/ohconfig_web.iml" filepath="$PROJECT_DIR$/../../ohconfig_web/.idea/ohconfig_web.iml" />
       <module fileurl="file://$PROJECT_DIR$/../opconfig/.idea/opconfig.iml" filepath="$PROJECT_DIR$/../opconfig/.idea/opconfig.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/python_module.iml" filepath="$PROJECT_DIR$/.idea/python_module.iml" />
     </modules>

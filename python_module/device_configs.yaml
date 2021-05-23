@@ -1,3 +1,6 @@
+# This file contains the hardware device definitions, i.e. what all sensors/switches/lights attached to a hardware
+# device.
+
 my_home:
   general:
     - electricity_status
@@ -12,7 +15,6 @@ dev_mpr_relay6:
     - uptime
     - ip_address
     - mac_address
-
   binary_sensor:
     - touch_key_0
     - touch_key_1
@@ -26,7 +28,6 @@ dev_mpr_relay6:
     - touch_key_9
     - touch_key_10
     - touch_key_11
-
   switch:
     - restart
     - relay_0
@@ -36,7 +37,6 @@ dev_mpr_relay6:
     - relay_4
     - relay_5
     - relay_6
-
   light:
     - id: switch_lights
       effects:
@@ -44,6 +44,24 @@ dev_mpr_relay6:
         - Rainbow
         - CO Alarm
         - Intrusion Alarm
+
+dev_relay8:
+  status:  #entity
+  sensor:  #entity
+    - wifi_signal
+    - uptime
+    - ip_address
+    - mac_address
+  switch:
+    - restart
+    - relay_0
+    - relay_1
+    - relay_2
+    - relay_3
+    - relay_4
+    - relay_5
+    - relay_6
+    - relay_7
 
 dev_relay1:
   status:
@@ -53,7 +71,6 @@ dev_relay1:
     - uptime
     - ip_address
     - mac_address
-
   switch:
     - restart
     - relay_0
@@ -66,7 +83,6 @@ dev_mpr_pir_relay:
     - uptime
     - ip_address
     - mac_address
-
   binary_sensor:
     - pir_sensor
     - touch_key_0
@@ -81,7 +97,6 @@ dev_mpr_pir_relay:
     - touch_key_9
     - touch_key_10
     - touch_key_11
-
   switch:
     - restart
     - relay_0
@@ -91,7 +106,6 @@ dev_mpr_pir_relay:
     - relay_4
     - relay_5
     - relay_6
-
   light:
     - id: switch_lights
       effects:
@@ -108,7 +122,8 @@ quin_led_duo_v2_6:
     - uptime
     - ip_address
     - mac_address
-
+  switch:
+    - restart
   light:
     - id: light_1
     - id: light_2
@@ -121,10 +136,23 @@ dev_cust1_staircase:
     - uptime
     - ip_address
     - mac_address
-
   binary_sensor:
     - grid_power
-
   switch:
     - restart
     - relay_0
+
+wled_all:
+  items:
+    masterControls: Color
+    primaryColor: Color
+    secondaryColor: Color
+    fx: String
+    palettes: String
+    presets: String
+    speed: Dimmer
+    intensity: Dimmer
+    presetDuration: Dimmer
+    transformTime: Dimmer
+    presetCycle: Switch
+    sleep: Switch

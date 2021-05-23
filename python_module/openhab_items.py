@@ -65,7 +65,11 @@ def create_item(data: dict, device_id: str, parent_groups: List[str], channel: O
 
 def get_channel(bridge: OHMqttBridge, device_id: str, item_id: str) -> OHChannel:
     thing = next(filter(lambda x: x.get_thing_id() == device_id, bridge.get_things()))
-    channel = next(filter(lambda x: x.get_entity_name() == item_id, thing.get_channels()))
+    try:
+        channel = next(filter(lambda x: x.get_entity_name() == item_id, thing.get_channels()))
+    except StopIteration as e:
+        print(f'device_config.yaml is not having \'{item_id}\' for device \'{device_id}\'.')
+        raise e
     return channel
 
 

@@ -318,6 +318,10 @@ class OHSiteMapFrame(OHBase):
         return self.children
 
     def convert_to_string(self) -> List[str]:
+        # if no children, then skip this frame.
+        if not self.children:
+            return []
+
         row = f'Frame'
         if self.label:
             row += f' label="{self.label}"'

@@ -1,3 +1,6 @@
+# This file contains the mqtt related information.
+# This file may not need any change, if you are not sure, please don't change anything here.
+
 # esphome MQTT topics to be generated for each channels (sensor, switch, lights etc.)
 esphome:
   status:
@@ -26,23 +29,19 @@ openhab_ch:
   general:
     datatype: string
     channels: [commandTopic, stateTopic]
-
   sensor:
     datatype: string
     channels:
       state: stateTopic
-
   binary_sensor:
     datatype: string
     channels:
       state: stateTopic
-
   switch:
     datatype: switch
     channels:
       state: stateTopic
       command: commandTopic
-
   light:
     datatype: string
     channels:

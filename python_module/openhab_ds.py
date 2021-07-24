@@ -32,6 +32,7 @@ class ChannelCommand(OHBase):
 
     Ex- stateTopic="relay_6_mpr_c/status"
     """
+
     def __init__(self, key, value):
         self.key = key
         self.value = value
@@ -45,12 +46,13 @@ class ChannelCommand(OHBase):
 
 class OHChannel(OHBase):
     """OpenHAB channel class"""
-    def __init__(self, ch_type='string', name='', entity_name: str = ''):
+
+    def __init__(self, ch_type='string', name: str = '', entity_name: str = ''):
         self.type: str = ch_type
         self.name: str = name
         self.commands: List[ChannelCommand] = []
         self.entity_name = entity_name  # ex- wifi_signal, relay_0 etc.
-        self.thing: OHThings = None  # thing in which this channel is added. will be used in creating items.
+        self.thing: OHThingBase = None  # thing in which this channel is added. will be used in creating items.
 
     def __str__(self):
         return 'Channel ' + self.name
@@ -81,18 +83,27 @@ class OHChannel(OHBase):
         return channel
 
 
-class OHThings(OHBase):
-    def __init__(self, binding_id: str, type_id: str, thing_id: str, label: str = '', location: str = 'home'):
+class OHThingBase(OHBase):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def thing_for_item(self) -> str:
+        pass
+
+    def get_thing_id(self) -> str:
+        pass
+
+
+class OHThings(OHThingBase):
+    def __init__(self, binding_id: str, type_id: str, thing_id: str, label: str = '', location: str = None):
+        super(OHThings, self).__init__()
         self.binding_id: str = binding_id
         self.type_id: str = type_id
         self.thing_id: str = thing_id
-        if label:
-            self.label = label
-        else:
-            self.label = thing_id
+        self.label = label if label else thing_id
         self.location: str = location
         self.channels: List[OHChannel] = []
-        self.bridge: OHMqttBridge = None  # mqtt bridge in which this thing is added. Will be used in creating items.
+        self.bridge: OHBridge = None  # mqtt bridge in which this thing is added. Will be used in creating items.
 
     def add_channel(self, channel: OHChannel):
         self.channels.append(channel)
@@ -104,8 +115,9 @@ class OHThings(OHBase):
         self.bridge = bridge
 
     def thing_for_item(self) -> str:
-        thing = f'{self.bridge.bridge_for_item()}:{self.thing_id}'
-        return thing
+        if self.bridge:
+            return f'{self.bridge.thing_for_item()}:{self.thing_id}'
+        return f'{self.binding_id}:{self.type_id}:{self.thing_id}'
 
     def get_thing_id(self) -> str:
         return self.thing_id
@@ -113,28 +125,66 @@ class OHThings(OHBase):
     def get_channels(self) -> List[OHChannel]:
         return self.channels
 
+    def convert_to_string(self) -> List[str]:
+        header = f'Thing topic {self.thing_id} "{self.label}" {{'
+        channels = self.convert_to_string_child(self.channels)
+        all_stats = [header, 'Channels:'] + channels + ['}', '']
+        return all_stats
+
 
 class OHMqttThings(OHThings):
-    def __init__(self, thing_id: str, label: str = '', location: str = 'home'):
-        super().__init__('', '', thing_id, label, location)
+    def __init__(self, thing_id: str, label: str = ''):
+        super().__init__('', '', thing_id, label)
+
+    def thing_for_item(self) -> str:
+        thing = f'{self.bridge.thing_for_item()}:{self.thing_id}'
+        return thing
 
     def convert_to_string(self) -> List[str]:
         header = f'Thing topic {self.thing_id} "{self.label}" {{'
         channels = self.convert_to_string_child(self.channels)
         all_stats = [header, 'Channels:'] + channels + ['}', '']
-
         return all_stats
 
 
-class OHMqttBridge(OHBase):
+class OHWledThing(OHThings):
+    def __init__(self, thing_id: str, label: str, address: str):
+        super().__init__('wled', 'wled', thing_id, label)
+        self.address = address
+
+    def convert_to_string(self) -> List[str]:
+        header = f'Thing {self.binding_id}:{self.type_id}:{self.thing_id} "{self.label}" [address="{self.address}"]'
+        all_stats = [header]
+        return all_stats
+
+
+class OHBridge(OHThingBase):
+    def __init__(self, binding_id: str, bridge_type: str, bridge_id: str):
+        super(OHBridge, self).__init__()
+        self.binding_id = binding_id
+        self.bridge_type = bridge_type
+        self.bridge_id = bridge_id
+        self.things: List[OHThings] = []
+
+    def thing_for_item(self) -> str:
+        bridge = f'{self.binding_id}:{self.bridge_type}:{self.bridge_id}'
+        return bridge
+
+    def add_thing(self, thing: OHThings):
+        self.things.append(thing)
+
+    def get_things(self) -> List[OHThings]:
+        return self.things
+
+
+class OHMqttBridge(OHBridge):
     def __init__(self, bridge_id: str = 'mybroker', mqtt_host: str = 'localhost', secure: bool = False,
                  username: str = '', password: str = ''):
-        self.bridge_id = bridge_id
+        super().__init__('mqtt', 'broker', bridge_id)
         self.mqtt_host = mqtt_host
         self.secure = secure
         self.mqtt_user_name = username
         self.mqtt_password = password
-        self.things: List[OHThings] = []
 
     def convert_to_string(self) -> List[str]:
         header = f'Bridge mqtt:broker:{self.bridge_id} [ host="{self.mqtt_host}", secure={str(self.secure).lower()}'
@@ -146,13 +196,7 @@ class OHMqttBridge(OHBase):
 
         return all_stats
 
-    def add_thing(self, thing: OHThings):
-        self.things.append(thing)
-
-    def get_things(self) -> List[OHThings]:
-        return self.things
-
-    def bridge_for_item(self) -> str:
+    def thing_for_item(self) -> str:
         bridge = f'mqtt:topic:{self.bridge_id}'
         return bridge
 
@@ -163,13 +207,10 @@ class OHItem(OHBase):
                  raw_item: str = None, **kwargs):
         self.item_type = item_type
         self.item_name = name
-        if label: self.label = label
-        else: self.label = name
+        self.label = label if label else name
         self.icon = icon
-        if groups: self.groups = groups
-        else: self.groups = []
-        if tags: self.tags = tags
-        else: self.tags = []
+        self.groups = groups if groups else []
+        self.tags = tags if tags else []
         self.main_ui = main_ui
         self.id = id  # id of this item (this will match with channel entity).
         self.device_id: str = None
@@ -226,12 +267,14 @@ class OHItem(OHBase):
 
 class OHGroup(OHBase):
     def __init__(self, id: str = None, label: str = None, icon: str = None, groups: List[str] = None,
-                 semantic_class: str = '', raw_grp: str = None, main_ui: str = 'yes'):
+                 semantic_class: str = '', raw_grp: str = None, main_ui: str = 'yes', **kwargs):
         self.id = id  # group name
         self.label = label
         self.icon = icon
-        if groups: self.groups = groups
-        else: self.groups = []
+        if groups:
+            self.groups = groups
+        else:
+            self.groups = []
         self.semantic_class = semantic_class
         self.raw_grp = raw_grp
         self.main_ui = main_ui

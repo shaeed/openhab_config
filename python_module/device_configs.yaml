@@ -144,15 +144,57 @@ dev_cust1_staircase:
 
 wled_all:
   items:
-    masterControls: Color
-    primaryColor: Color
-    secondaryColor: Color
-    fx: String
-    palettes: String
-    presets: String
-    speed: Dimmer
-    intensity: Dimmer
-    presetDuration: Dimmer
-    transformTime: Dimmer
-    presetCycle: Switch
-    sleep: Switch
+    - id: masterControls
+      sitem_type: Switch
+      label: Light
+    - id: masterControls
+      sitem_type: Slider
+      label: Brightness
+    - id: masterControls
+      item_type: Color
+      label: Light Color
+      icon: colorwheel
+
+    - id: primaryColor
+      item_type: Color
+      label: Primary Color
+      icon: colorwheel
+    - id: secondaryColor
+      item_type: Color
+      label: Secondary Color
+      icon: colorwheel
+    - id: fx
+      item_type: String
+      label: Effect  # fx
+      icon: text
+    - id: palettes
+      item_type: String
+      label: Palette
+      icon: colorwheel
+    - id: presets
+      item_type: String
+      label: Preset
+      icon: text
+    - id: speed
+      item_type: Dimmer
+      label: Effect Speed  # fx speed
+      icon: time
+    - id: intensity
+      item_type: Dimmer
+      label: Effect Intensity  # FX Intensity
+    - id: presetDuration
+      item_type: Dimmer
+      label: Preset Duration
+      icon: time
+    - id: transformTime
+      item_type: Dimmer
+      label: Preset Transform Time
+      icon: time
+    - id: presetCycle
+      item_type: Switch
+      label: Preset Cycle
+      icon: time
+    - id: sleep
+      item_type: Switch
+      label: Sleep
+      icon: moon

@@ -3,21 +3,17 @@ Sitemap will be generated from items added under my devices and Sitemap data fro
 """
 
 from openhab_ds import OHItem, OHSiteMapFrame, OHBase, OHSiteMap, OHSiteMapItem, OHGroup
-from openhab_things import get_thing_and_dev_type, get_wled_thing_id
-from configs import get_device_configs
+from devices import RootDev
 from typing import List, Union, Tuple
 
 
-def create_sitemap(items: List[OHItem], groups: List[OHGroup], data: dict, devices: List[dict]) -> OHSiteMap:
+def create_sitemap(items: List[OHItem], groups: List[OHGroup], data: dict, devices: List[RootDev]) -> OHSiteMap:
     # sitemap label
-    label = 'Home'
-    if 'sitemap' in data and 'lable' in data['sitemap']:
-        label = data['sitemap']['label']
-
+    label = data.get('sitemap', {}).get('label') or 'Home'
     sitemap = OHSiteMap(label=label)
     # user sitemap
-    if 'sitemap' in data and 'items' in data['sitemap']:
-        children = create_sitems(data['sitemap']['items'], items)
+    children = create_sitems(data.get('sitemap', {}).get('items', []), items)
+    if any(children):
         sitemap.add_children(children)
 
     # items from configured devices & groups
@@ -66,17 +62,17 @@ def get_item(item_id: str, dev_id: str, items: List[OHItem]) -> Union[OHItem, st
     return item_id
 
 
-def get_device_sitemap_frames(device: dict, devices: List[dict]):
-    dev_frame = OHSiteMapFrame(label=device['name'])
+def get_device_sitemap_frames(device: RootDev, devices: List[RootDev]):
+    dev_frame = OHSiteMapFrame(label=device.name)
     # status & settings item
     # check if device name is used more than 1
-    dev_name_count = sum([1 for x in devices if x['name'] == device['name']])
+    dev_name_count = sum([1 for x in devices if x.name == device.name])
     if dev_name_count == 1:
         # just one instance
-        dev_setting_frame = OHSiteMapFrame(label=device['name'])
+        dev_setting_frame = OHSiteMapFrame(label=device.name)
     else:
         # more than one instance (Add device id also in label)
-        dev_setting_frame = OHSiteMapFrame(label=f"{device['name']} ({device['id']})")
+        dev_setting_frame = OHSiteMapFrame(label=f"{device.name} ({device.thing_id})")
 
     return dev_frame, dev_setting_frame
 
@@ -91,7 +87,7 @@ def get_location_dev_frame(devices_frame: OHSiteMapFrame, label: str, icon: str)
         return dev_frame, True
 
 
-def sitemap_for_devices(items: List[OHItem], groups: List[OHGroup], devices: List[dict]) -> List[OHBase]:
+def sitemap_for_devices(items: List[OHItem], groups: List[OHGroup], devices: List[RootDev]) -> List[OHBase]:
     # status and settings frame
     status_frame = OHSiteMapFrame()
     status_settings = OHSiteMapItem(sitem_type='Text', label='Status & Settings', icon='settings')
@@ -102,31 +98,32 @@ def sitemap_for_devices(items: List[OHItem], groups: List[OHGroup], devices: Lis
     # sitemap items/frames
     all_sitems = [collapse_dev_frame]
 
-    for device in devices:
-        print(f'[sitemap] Creating sitemap for {device["name"]}.')
-        dev_frame, dev_sett_frame = sitemap_for_device(device, devices, items)
+    for dev in devices:
+        dev_data = dev.device_data
+        print(f'[sitemap] Creating sitemap for {dev_data["name"]}.')
+        dev_frame, dev_sett_frame = sitemap_for_device(dev, devices, items)
         if dev_frame:
-            if device['parent']:
+            if dev_data['parent']:
                 # get frame for devices belongs to Location
-                parent_frame, is_new = get_location_dev_frame(collapse_dev_frame, device['parent']['label'],
-                                                              device['parent']['icon'])
+                parent_frame, is_new = get_location_dev_frame(collapse_dev_frame, dev_data['parent']['label'],
+                                                              dev_data['parent']['icon'])
                 if is_new:
                     collapse_dev_frame.add_child(parent_frame)
-                if 'expand' in device and device['expand']:
+                if 'expand' in dev_data and dev_data['expand']:
                     # expanded device under location
                     parent_frame.add_child(dev_frame)
                 else:
                     # don't expand device under location
-                    dev_text = OHSiteMapItem(sitem_type='Text', label=device['name'], icon=device['icon'])
+                    dev_text = OHSiteMapItem(sitem_type='Text', label=dev_data['name'], icon=dev_data['icon'])
                     dev_text.add_child(dev_frame)
                     parent_frame.add_child(dev_text)
             else:
-                if 'expand' in device and device['expand']:
+                if 'expand' in dev_data and dev_data['expand']:
                     # Need to expand this device on home screen
                     all_sitems.append(dev_frame)
                 else:
                     # add under collapsed devices
-                    parent_frame, is_new = get_location_dev_frame(collapse_dev_frame, device['name'], device['icon'])
+                    parent_frame, is_new = get_location_dev_frame(collapse_dev_frame, dev_data['name'], dev_data['icon'])
                     if is_new:
                         collapse_dev_frame.add_child(parent_frame)
                     parent_frame.add_child(dev_frame)
@@ -143,16 +140,15 @@ def sitemap_for_devices(items: List[OHItem], groups: List[OHGroup], devices: Lis
     return all_sitems
 
 
-def sitemap_for_device(device: dict, devices: List[dict], items: List[OHItem]):
+def sitemap_for_device(device: RootDev, devices: List[RootDev], items: List[OHItem]):
     dev_entry, dev_setting_frame = get_device_sitemap_frames(device, devices)
     flag_add_dev_frame = False
     flag_add_dev_setting_frame = False
-    dev_id, items_data = get_device_id_and_items(device)
-    for item in items_data:
+    for item in device.items_dict:
         if isinstance(item, str):
             # raw items, no need to add in sitemaps
             continue
-        actual_item = get_item(item['id'], dev_id, items)
+        actual_item = get_item(item['id'], device.thing_id, items)
         if 'sitem_type' in item:
             # this is just sitemap component
             actual_sitem = OHSiteMapItem(**item)
@@ -167,17 +163,6 @@ def sitemap_for_device(device: dict, devices: List[dict], items: List[OHItem]):
     # end for
     ret = (dev_entry if flag_add_dev_frame else None, dev_setting_frame if flag_add_dev_setting_frame else None)
     return ret
-
-
-def get_device_id_and_items(device: dict) -> Tuple[str,  List[dict]]:
-    thing_type, dev_type = get_thing_and_dev_type(device['type'])
-    if thing_type == 'mqtt' and 'items' in device:
-        return device['id'], device['items']
-    elif thing_type == 'wled':
-        device_config = get_device_configs()
-        dev_id = get_wled_thing_id(device['id'])
-        return dev_id, device_config[dev_type]['items']
-    return device['id'], []
 
 
 def add_item_to_places(item: dict, actual_sitem: OHSiteMapItem, dev_entry, dev_setting_frame):

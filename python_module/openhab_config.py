@@ -1,7 +1,7 @@
 
 """Config generator for openHAB"""
 
-from openhab_things import get_mqtt_bridge, create_things_channels, create_bridge_and_things
+from openhab_things import create_bridge_and_things
 from openhab_items import create_items, create_groups
 from openhab_sitemap import create_sitemap
 from openhab_ds import OHBase
@@ -11,7 +11,7 @@ from functools import reduce
 import os
 
 
-flag_write_to_file = True
+flag_write_to_file = False
 flag_oh_folders = True
 
 
@@ -51,24 +51,6 @@ def get_oh_file_paths(base_path: str) -> tuple:
     return thing_file, item_file, sitemap_file
 
 
-def process1(dev_yaml: str, conf_path: str):
-    data = get_my_devices(dev_yaml)
-
-    mqtt_bridge = get_mqtt_bridge(**data['mqtt_broker'])
-    create_things_channels(mqtt_bridge, data['devices'])
-    groups = create_groups(data['locations'])
-    items = create_items(mqtt_bridge, data['devices'])
-    sitemap = create_sitemap(items, groups, data['sitemap'], data['devices'])
-
-    # create things, items, sitemap file
-    thing_file, item_file, sitemap_file = get_oh_file_paths(conf_path)
-    write_to_file(mqtt_bridge, thing_file)
-    write_to_file(groups + items, item_file)
-    write_to_file(sitemap, sitemap_file)
-
-    print('Success ..')
-
-
 def get_all_devices(data: dict, parent: dict = None) -> list:
     if not isinstance(data, dict):
         return []
@@ -82,7 +64,7 @@ def get_all_devices(data: dict, parent: dict = None) -> list:
                 dev['parent'] = parent
             devices.extend(data[key])
         elif isinstance(data[key], dict):
-            devices.extend(get_all_devices(data[key], data.get('label', None)))
+            devices.extend(get_all_devices(data[key], data.get('label')))
         elif isinstance(data[key], list):
             for ele in data[key]:
                 devices.extend(get_all_devices(ele))
@@ -95,11 +77,11 @@ def process(dev_yaml: str, conf_path: str):
     all_devices = get_all_devices(data)
 
     # create things
-    things = create_bridge_and_things(all_devices, data)
+    things, formed_devs = create_bridge_and_things(all_devices, data)
     # create group and items
     groups = create_groups(data['locations'])
-    items = create_items(things, all_devices)
-    sitemap = create_sitemap(items, groups, data, all_devices)
+    items = create_items(formed_devs)
+    sitemap = create_sitemap(items, groups, data, formed_devs)
 
     # create things, items, sitemap file
     thing_file, item_file, sitemap_file = get_oh_file_paths(conf_path)
